@@ -19,6 +19,7 @@ so a crash or a browser refresh costs nothing.
 from __future__ import annotations
 
 import csv
+import hashlib
 import os
 import re
 from datetime import datetime, timezone
@@ -75,8 +76,21 @@ _TERM_RE = re.compile(r"^(?P<term>.+?)\((?P<count>\d+)\)$")
 # --------------------------------------------------------------------------- io
 
 
+def sheet_fingerprint(path: Path) -> str:
+    """Content hash of the sheet.
+
+    Passed into the cached loader as a key. Caching on the PATH alone meant that
+    publishing a new validation round to the same filename kept serving the old
+    dataframe -- the cache had no way to know the bytes had changed.
+    """
+    try:
+        return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
+    except OSError:
+        return "missing"
+
+
 @st.cache_data(show_spinner=False)
-def load_sheet(path: str) -> pd.DataFrame:
+def load_sheet(path: str, fingerprint: str) -> pd.DataFrame:
     frame = pd.read_csv(path, dtype=str).fillna("")
     for column in ("label", "notes"):
         if column not in frame.columns:
@@ -299,9 +313,18 @@ def main() -> None:
     store = st.session_state.store
     sync: SyncState = st.session_state.sync
 
+    # A published new round reuses the filename, so an open browser session would
+    # otherwise keep labeling the previous sample. Drop the cached frame when the
+    # underlying bytes change.
+    fingerprint = sheet_fingerprint(SHEET)
+    if st.session_state.get("sheet_fingerprint") != fingerprint:
+        st.session_state.pop("frame", None)
+        st.session_state.pop("idx", None)
+        st.session_state.sheet_fingerprint = fingerprint
+
     # ---- load + resume ----------------------------------------------------
     if "frame" not in st.session_state:
-        frame = load_sheet(str(SHEET)).copy()
+        frame = load_sheet(str(SHEET), fingerprint).copy()
         saved = load_progress(out_path)
         if store is not None and not saved:
             # Cold container on Streamlit Cloud: local disk is empty but the repo
@@ -350,6 +373,9 @@ def main() -> None:
     # ---- sidebar ----------------------------------------------------------
     with st.sidebar:
         st.subheader(f"👤 {annotator}")
+        st.caption(f"round `{ROUND or 'r1'}` · sheet `{fingerprint}`"
+                   + ("  · with past context" if "wearer_past_context"
+                      in st.session_state.frame.columns else ""))
         st.progress(n_done / total, text=f"{n_done} / {total} labeled "
                                          f"({n_done / total:.0%})")
         col_a, col_b = st.columns(2)
