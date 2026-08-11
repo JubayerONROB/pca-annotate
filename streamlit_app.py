@@ -38,6 +38,7 @@ REPO_ROOT = HERE.parent
 SHEET_NAME = "dataset2_annotation_sheet.csv"
 INSTRUCTIONS_NAME = "dataset2_annotation_instructions.md"
 OUT_TEMPLATE = "dataset2_annotation_sheet_{annotator}.csv"
+ROUND_FILE = "round.txt"
 # Where annotator CSVs live inside the GitHub repo.
 REMOTE_DIR = "annotations"
 
@@ -53,6 +54,11 @@ def _find(name: str) -> Path:
 
 
 SHEET = _find(SHEET_NAME)
+# A validation round tag, when the deploy carries one. Output filenames include it so
+# re-publishing a fresh sample can never overwrite a completed round's labels.
+_round_path = _find(ROUND_FILE)
+ROUND = (_round_path.read_text(encoding="utf-8").strip()
+         if _round_path.exists() else "")
 INSTRUCTIONS = _find(INSTRUCTIONS_NAME)
 # Streamlit Cloud mounts the repo read-only in some configurations.
 OUT_DIR = SHEET.parent if os.access(SHEET.parent, os.W_OK) else Path(".")
@@ -80,6 +86,8 @@ def load_sheet(path: str) -> pd.DataFrame:
 
 def output_path(annotator: str) -> Path:
     safe = re.sub(r"[^A-Za-z0-9_.-]+", "_", annotator).strip("_") or "anonymous"
+    if ROUND:
+        safe = f"{ROUND}_{safe}"
     return OUT_DIR / OUT_TEMPLATE.format(annotator=safe)
 
 
@@ -146,6 +154,10 @@ CSS = """
         border-radius:1rem; font-size:.84rem;
         background:rgba(63,185,80,.15); border:1px solid rgba(63,185,80,.45); }
 .chip b { opacity:.65; font-weight:600; font-size:.78rem; }
+.past { padding:.5rem .7rem; margin:.25rem 0; border-radius:.5rem; font-size:.9rem;
+        background:rgba(137,87,229,.13); border-left:3px solid rgba(137,87,229,.6);
+        line-height:1.45; }
+.past .mtg { font-weight:700; opacity:.7; font-size:.8rem; margin-right:.35rem; }
 .meta { opacity:.7; font-size:.86rem; }
 .done { padding:.3rem .6rem; border-radius:.4rem; font-weight:700;
         background:rgba(63,185,80,.18); border:1px solid rgba(63,185,80,.5); }
@@ -189,6 +201,25 @@ def render_chips(block: str) -> str:
         chips.append(f"<span class='chip'>{esc(term.strip())}"
                      + (f" <b>×{count}</b>" if count else "") + "</span>")
     return "".join(chips)
+
+
+def render_past(block: str) -> str:
+    """Earlier utterances of this wearer, one card each."""
+    if not block.strip():
+        return "<div class='meta'>(no earlier context)</div>"
+    if block.strip().startswith("("):
+        return f"<div class='meta'>{esc(block.strip())}</div>"
+    out = []
+    for line in block.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        meeting = ""
+        if line.startswith("[") and "]" in line:
+            meeting, _, line = line[1:].partition("]")
+        out.append(f"<div class='past'><span class='mtg'>{esc(meeting)}</span>"
+                   f"{esc(line.strip())}</div>")
+    return "".join(out)
 
 
 def bind_keyboard() -> None:
@@ -398,6 +429,12 @@ def main() -> None:
         st.caption("Their most frequent terms from EARLIER meetings, with counts. "
                    "Same view for every card — it does not indicate the answer.")
         st.markdown(render_chips(row["wearer_profile_terms"]), unsafe_allow_html=True)
+        if "wearer_past_context" in row.index:
+            st.markdown("#### What they said in earlier meetings")
+            st.caption("Real utterances from this wearer's PAST meetings, so the terms "
+                       "above have context. Selected the same way for every card.")
+            st.markdown(render_past(str(row["wearer_past_context"])),
+                        unsafe_allow_html=True)
 
     st.divider()
 
