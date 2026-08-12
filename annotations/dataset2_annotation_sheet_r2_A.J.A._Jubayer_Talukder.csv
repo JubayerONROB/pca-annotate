@@ -40,7 +40,7 @@ User: utterance types. There's, uh, automatic, uh, punctuation and stuff like th
 Speaker 2: Yep. I I don't see any way that file formats are gonna help us with that. It's it's all a question of semantic.
 User: No. No. But once you have a file format, I can imagine writing","not personally, but someone writing a tool that is essentially an alignment tool,","laughter(7), fair number(3), switchboard(3), visual contact(3), breathing(3), downsampling(3), jane(2), overlaps(2), transcripts(2), andreas(2), chairs(2), minute(2), nodding(2), overlap(2), ibm(2), models(2), more work(2), sri recognizer(2), language model(2), sri(2)","[Bmr005] No, of course. I expect you to find more overlaps than than Jane because you're looking at it at a much more detailed level.
 [Bmr010] It is useful to transcribe and then ultimately train models for things like breath, and also laughter is very, very frequent and important to
-[Bmr012] And and feed them to feed them to the SRI recognizer and see if if the SRI front - end does something.",,Direct sentence continuation; procedural/logic turn with no specific entity retrieval from memory.,A.J.A. Jubayer Talukder,2026-08-12T04:57:07+00:00
+[Bmr012] And and feed them to feed them to the SRI recognizer and see if if the SRI front - end does something.",0,Direct sentence continuation; procedural/logic turn with no specific entity retrieval from memory.,A.J.A. Jubayer Talukder,2026-08-12T04:57:07+00:00
 icsi/Val/000062/33611,icsi,Val,fe016,Buw001,"Speaker 1: get all the standards, and to do anything with it.
 Speaker 2: So we're gonna do what we're gonna do, whatever's reasonable for us. But having
 Speaker 1: Yeah.
