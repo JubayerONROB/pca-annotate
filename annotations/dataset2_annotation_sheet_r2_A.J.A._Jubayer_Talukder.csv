@@ -136,7 +136,7 @@ User: OK.
 Speaker 1: So there is no way of telling it t not to tell us about the EVA values.
 User: Yeah, wait I agree, that's yeah, use oh, uh Yeah, OK.","Look at that Struct in the output, right?","source(9), mode(8), xml(8), roles(8), discourse(7), door(7), tourist(7), smartkom(6), admission fee(6), bayes(6), action(6), tango(5), bhaskara(5), context(5), enter(5), javabayes(5), net(5), node(5), probabilities(5), robert(5)","[Bed003] Yeah I know there is an I was looking on the we web page and he's updated it for an XML version of I guess Bayes - nets. There's a Bayes - net spec for in XML.
 [Bed004] And I separated them out. And then I um did similar things for our our net to uh with the context and the discourse and whatnot,
-[Bed006] One reason we're doing it this way is in case there's extra structure that's in the Enter action that's not captured by the schemas, right?",0,Immediate conversational rephrasing/clarification regarding the output struct; no long-term memory retrieval required.,A.J.A. Jubayer Talukder,2026-08-12T05:17:34+00:00
+[Bed006] One reason we're doing it this way is in case there's extra structure that's in the Enter action that's not captured by the schemas, right?",,Immediate conversational rephrasing/clarification regarding the output struct; no long-term memory retrieval required.,A.J.A. Jubayer Talukder,2026-08-12T05:17:34+00:00
 icsi/Test/000054/57795,icsi,Test,fe016,Bmr019,"Speaker 4: So we're taking these, uh, alignments from the individual channels. We're from each alignment we're producing, uh, one of these CTM files, which essentially has it's just a linear sequence of words with the begin times for every word and the duration.
 Speaker 5: Great.
 Speaker 4: And and and of course
